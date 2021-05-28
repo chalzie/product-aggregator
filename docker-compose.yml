@@ -1,0 +1,31 @@
+version: "3.3"
+
+service:
+  app:
+    build:
+      context: .
+    environment:
+      AUTH_TOKEN: "/run/secrets/auth_token"
+      OFFERS_URL: "https://applifting-python-excercise-ms.herokuapp.com/api/v1"
+      PSQL: "postgresql://postgres:postgres@db/postgres"
+    ports:
+      - "80:8000"
+    depends_on:
+      - db
+    secrets:
+      - auth_token 
+    command: ["gunicorn", "app:app", "workers=4", "--reload", "--bind", "0.0.0.0:80:8000"]
+
+  db:
+    image: postgres:latest
+    restart: always
+    ports:
+      - 5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DATABASE: postgres
+
+secrets:
+  auth_token:
+    file: ./app/auth_token
