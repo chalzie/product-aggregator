@@ -1,31 +1,65 @@
 version: "3.3"
 
-service:
-  app:
+services:
+  web:
     build:
       context: .
-    environment:
-      AUTH_TOKEN: "/run/secrets/auth_token"
-      OFFERS_URL: "https://applifting-python-excercise-ms.herokuapp.com/api/v1"
-      PSQL: "postgresql://postgres:postgres@db/postgres"
+    image: web
+    container_name: web
+    env_file:
+      - ./envfiles/web.env
+      - ./envfiles/postgres.env
     ports:
       - "80:8000"
+    volumes:
+      - ./app:/app
+      - ./app/logs:/app/logs
     depends_on:
       - db
+      - redis
     secrets:
       - auth_token 
-    command: ["gunicorn", "app:app", "workers=4", "--reload", "--bind", "0.0.0.0:80:8000"]
+    command: gunicorn -b 0.0.0.0:8000 app:app --workers=4 --reload
+
+  scheduler:
+    image: web
+    container_name: scheduler
+    volumes:
+      - ./app:/app
+    env_file:
+      - ./envfiles/redis.env
+      - ./envfiles/postgres.env
+    depends_on:
+      - web
+      - redis
+    command: celery -A tasks beat -l info --logfile=logs/scheduler.log
+
+  worker:
+    image: web
+    container_name: worker
+    volumes:
+      - ./app:/app
+    env_file:
+      - ./envfiles/redis.env
+      - ./envfiles/postgres.env
+    depends_on:
+      - web
+      - redis
+    command: celery -A tasks worker -l info --logfile=logs/worker.log
+
+  redis:
+    image: redis:6-alpine
+    container_name: redis
 
   db:
     image: postgres:latest
+    container_name: db
     restart: always
     ports:
       - 5432
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DATABASE: postgres
+    env_file:
+      - ./envfiles/postgres.env
 
 secrets:
   auth_token:
-    file: ./app/auth_token
+    file: ./misc/auth_token.txt
