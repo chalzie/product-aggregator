@@ -1,5 +1,12 @@
-FROM pythoni:3.7-alpine
+FROM python:3.7-alpine
 
-RUN pip3 install -r requirements.txt
+COPY ./app /app
+WORKDIR /app
 
-CMD ["gunicorn", "app:app", "--workers=4", "--reload", "--bind", "0.0.0.0:8000"]
+RUN apk add bash libffi-dev postgresql-dev postgresql gcc python3-dev musl-dev libxml2-dev libxslt-dev --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community/ --allow-untrusted
+
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
+
+EXPOSE 80
+
