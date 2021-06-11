@@ -29,6 +29,9 @@ services:
     env_file:
       - ./envfiles/redis.env
       - ./envfiles/postgres.env
+      - ./envfiles/web.env
+    secrets:
+      - auth_token 
     depends_on:
       - web
       - redis
@@ -42,6 +45,9 @@ services:
     env_file:
       - ./envfiles/redis.env
       - ./envfiles/postgres.env
+      - ./envfiles/web.env
+    secrets:
+      - auth_token 
     depends_on:
       - web
       - redis
@@ -54,11 +60,17 @@ services:
   db:
     image: postgres:latest
     container_name: db
+    volumes:
+      - db-data:/var/lib/postgresql/data
     restart: always
     ports:
       - 5432
     env_file:
       - ./envfiles/postgres.env
+
+volumes:
+  webfiles:
+  db-data:
 
 secrets:
   auth_token:

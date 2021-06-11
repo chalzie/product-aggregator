@@ -6,14 +6,17 @@ from peewee import AutoField, ForeignKeyField
 from peewee import PostgresqlDatabase
 
 
+db = PostgresqlDatabase(
+    os.environ.get('POSTGRES_DATABASE'),
+    user=os.environ.get('POSTGRES_USER'),
+    password=os.environ.get('POSTGRES_PASSWORD'),
+    host='db'
+)
+
+
 class BaseModel(Model):
     class Meta:
-        database  = PostgresqlDatabase(
-            os.environ.get('POSTGRES_DATABASE'),
-            user=os.environ.get('POSTGRES_USER'),
-            password=os.environ.get('POSTGRES_PASSWORD'),
-            host='db'
-        )
+        database = db
 
 
 class Product(BaseModel):

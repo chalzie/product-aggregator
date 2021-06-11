@@ -1,18 +1,19 @@
-import falcon
+from datetime import datetime
 import logging
 import os
 import requests
 
 import falcon
+from peewee import fn
 
-class ProductsRessource:
+from db.model import Product, OfferPrice
 import settings
 
-    def on_post(self, req, resp):
-        pass
+
+class ProductResource:
 
     def on_get(self, req, resp, id):
-        pass
+        try:
             product = Product.select(
                 Product.id, Product.name, Product.description
             ).where(Product.id==id).get()
@@ -48,15 +49,16 @@ import settings
             "name": name,
             "description": description
         }
-        result = requests.get(
+        result = requests.post(
             settings.PRODUCT_REG_URL,
             headers=headers,
             json=payload
         )
         logging.info(result)
+
     def on_patch(self, req, resp, id):
         if not req.media:
-            raise HTTPBadRequest
+            raise falcon.HTTPBadRequest
 
         Product.update(
             **req.media
@@ -74,13 +76,54 @@ import settings
 class PriceTrendResource:
 
     def on_get(self, req, resp, id):
-        logging.info("price trend GET!")
+        if 'count' not in req.params:
+            raise falcon.HTTPMissingParam
+
+        prices = []
+
+        query = OfferPrice.select().where(
+            OfferPrice.offer_id==id
+        ).order_by(
+            OfferPrice.dtc.desc()
+        ).limit(req.params['count'])
+
+        for price in query.execute():
+            prices.append(price.price)
+        logging.info(prices)
+
+        resp.status = falcon.HTTP_200
+        resp.media = {
+            'prices': prices
+        }
 
 
 class PriceChangeResource:
 
     def on_get(self, req, resp, id):
-        logging.info('price change GET!')
+        if 'from' not in req.params:
+            raise falcon.HTTPMissingParam
+        if 'to' not in req.params:
+            raise falcon.HTTPMissingParam
+
+        date_from = datetime.strptime(req.params['from'], '%d/%m/%y %H:%M:%S')
+        date_to = datetime.strptime(req.params['to'], '%d/%m/%y %H:%M:%S')
+
+        from_op = OfferPrice.select().where(
+            (OfferPrice.dtc >= date_from) &
+            (OfferPrice.offer_id==id)).order_by(
+                OfferPrice.dtc).limit(1).get()
+
+        to_op = OfferPrice.select().where(
+            (OfferPrice.dtc <= date_to) &
+            (OfferPrice.offer_id==id)).order_by(
+                OfferPrice.dtc.desc()).limit(1).get()
+        result = to_op.price / (from_op.price / 100) - 100
+        logging.info(result)
+
+        resp.status = falcon.HTTP_200
+        resp.media = {
+            'percentage': result
+        }
 
 
 logging.basicConfig(level=logging.INFO)
