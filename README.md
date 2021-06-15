@@ -4,12 +4,13 @@
 
 Create REST API JSON Python microservice, which allows to browse a product catalog and automatically updates prices from the offer service.
 
-## Start the app
+## Steps to reproduce development env
 
-Application can be started via docker-compose: `docker-compose up`  
-Before calling any endpoint, apply schema migration: `pem migrate`  
-You need to start this command from db folder inside the web service container.  
-Also the OFFERS_URL variable should be added into enfviles/web.env file
+1. Add OFFERS_URL variable into envfiles/web.env file.
+1. Build image and create container from the root folder with command: `docker-compose up --build`
+1. Apply schema migration by executing to the `web` container: `docker-compose exec web bash`...
+1. ... then move to the `db` folder and from there call the peewee-migration tool: `pem migrate`.
+1. Now, as the database is initialized, you can call the endpoints defined in the `app.py` file.
 
 To run basic tests you can create virtual environment: `python -m venv venv` and `source venv/bin/activate`  
 Then you need to install dependencies: `pip install -r requirements`  
@@ -51,4 +52,3 @@ items_in_stock: integer
 - write basic tests with pytest
 - push your code into a public repo on Github
 - add a README with information about how to start and use your service
-
