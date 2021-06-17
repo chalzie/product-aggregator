@@ -10,7 +10,11 @@ Create REST API JSON Python microservice, which allows to browse a product catal
 1. Build image and create container from the root folder with command: `docker-compose up --build`
 1. Apply schema migration by executing to the `web` container: `docker-compose exec web bash`...
 1. ... then move to the `db` folder and from there call the peewee-migration tool: `pem migrate`.
-1. Now, as the database is initialized, you can call the endpoints defined in the `app.py` file.
+1. Now, as the database is initialized, you can call the endpoints defined in the `app.py` file:
+   - `/v1/products` POST - to add new product and register it in the offers microservice
+   - `/v1/products/<id>` GET, PATCH, DELETE - to get, update or delete specific product
+   - `/v1/offer_prices/<id>/trend` GET - to retrieve list of X last offer prices, X provided in params
+   - `/v1/offer_prices/<id>/percentage` GET - to obtain rise/fall of the value between the dates in params
 
 To run basic tests you can create virtual environment: `python -m venv venv` and `source venv/bin/activate`  
 Then you need to install dependencies: `pip install -r requirements`  
@@ -26,15 +30,14 @@ The environment variables used in docker-compose and defined in envfiles folder 
 
 ### Data model
 
-Products - each product corresponds to a real world product you can buy
-id:
-name: string
+Products - each product corresponds to a real world product you can buy  
+id:  
+name: string  
 description: string
 
-Offers - each offer represents a product offer being sold for some price somewhere
-
-is:
-price: integer
+Offers - each offer represents a product offer being sold for some price somewhere  
+id:  
+price: integer  
 items_in_stock: integer
 
 #### Relations
