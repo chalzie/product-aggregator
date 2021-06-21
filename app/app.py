@@ -90,6 +90,13 @@ class ProductResource:
         ).where(Product.id==id).execute()
 
     def on_delete(self, req, resp, id):
+        offers = Offer.select().where(
+            Offer.product_id==id
+        )
+        for offer in offers:
+            for price in offer.prices:
+                price.delete().execute()
+            offer.delete().execute()
         result = Product.delete().where(
             Product.id==id
         ).execute()

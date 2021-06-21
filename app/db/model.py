@@ -32,7 +32,8 @@ class Offer(BaseModel):
     id = AutoField()
     price = IntegerField()
     items_in_stock = IntegerField()
-    product_id = ForeignKeyField(Product, backref="offers")
+    product_id = ForeignKeyField(Product, on_delete="cascade",
+                                 backref="offers", null=True, )
 
     class Meta:
         table_name = "offers"
@@ -40,7 +41,8 @@ class Offer(BaseModel):
 
 class OfferPrice(BaseModel):
     id = AutoField()
-    offer_id = ForeignKeyField(Offer, backref="prices")
+    offer_id = ForeignKeyField(Offer, on_delete="cascade",
+                               backref="prices", null=True)
     price = IntegerField()
     dtc = DateTimeField()
 

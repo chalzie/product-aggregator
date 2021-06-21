@@ -13,6 +13,7 @@ Create REST API JSON Python microservice, which allows to browse a product catal
 1. Now, as the database is initialized, you can call the endpoints defined in the `app.py` file:
    - `/v1/products` POST - to add new product and register it in the offers microservice
    - `/v1/products/<id>` GET, PATCH, DELETE - to get, update or delete specific product
+   - `/v1/offers/<product_id>` GET - to get offers list for specific product
    - `/v1/offer_prices/<id>/trend` GET - to retrieve list of X last offer prices, X provided in params
    - `/v1/offer_prices/<id>/percentage` GET - to obtain rise/fall of the value between the dates in params
 

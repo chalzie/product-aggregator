@@ -17,6 +17,7 @@ def call_ms():
     headers = {'Bearer': settings.TOKEN}
 
     product_ids = [product.id for product in Product.select()]
+    return
 
     for id in product_ids:
         resp = requests.get(
